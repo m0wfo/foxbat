@@ -1,0 +1,3 @@
+= foxbat
+
+A plug-compatible EventMachine replacement, build from the ground up for JRuby
