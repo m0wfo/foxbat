@@ -3,7 +3,6 @@ import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousServerSocketChannel
 import java.nio.channels.AsynchronousSocketChannel
 import java.nio.channels.AsynchronousChannelGroup
-import java.nio.channels.CompletionHandler
 import java.nio.charset.Charset
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -15,7 +14,7 @@ import java.security.KeyStore
 
 #require File.join(File.dirname(__FILE__), 'handler.rb')
 
-module Foxbat
+module EventMachine
 
   class Server
 
@@ -34,7 +33,7 @@ module Foxbat
     def start
       @server.bind(@bind_address)
 
-      handler = Handler.new(@server) do |source,socket|
+      handler = Foxbat::Handler.new(@server) do |source,socket|
         source.accept(nil,handler)
 
         connection = @klass.new({:debug => true})
@@ -59,7 +58,7 @@ module Foxbat
         return read_channel(channel, connection, bb)
       end
 
-      reader = Handler.new(channel) do |c,br|
+      reader = Foxbat::Handler.new(channel) do |c,br|
 
         if br == -1
           c.close

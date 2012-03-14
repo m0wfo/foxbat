@@ -1,4 +1,4 @@
-module Foxbat
+module EventMachine
 
   class Connection
 

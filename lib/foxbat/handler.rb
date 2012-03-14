@@ -1,7 +1,11 @@
+import java.nio.channels.CompletionHandler
+
 module Foxbat
 
   class Handler
     include CompletionHandler
+
+    attr_writer :on_fail
 
     def initialize(source, &block)
       @source = source
@@ -13,7 +17,11 @@ module Foxbat
     end
 
     def failed(x,y)
-      p 'failed'
+      if @on_fail.nil?
+        p 'failed'
+      else
+        @on_fail.call(x,y)
+      end
     end
 
   end
