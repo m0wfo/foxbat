@@ -76,7 +76,7 @@ module EventMachine
         return read_channel(channel, connection, bb)
       end
 
-      handler = Handler.new(channel) do |c,br|
+      reader = Handler.new(channel) do |c,br|
         if br == -1
           c.close
           connection.unbind
@@ -92,12 +92,14 @@ module EventMachine
           memo << btos(buffer)
           buffer.clear
 
+          p memo.getbyte(0)
+
           connection.receive_data(memo)
           read_channel(c, connection, buffer)
         end
       end
 
-      channel.read(buffer, nil, handler)
+      channel.read(buffer, nil, reader)
     end
 
     def shutdown
