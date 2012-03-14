@@ -1,9 +1,10 @@
 require 'java'
 
-require 'em/connection'
-require 'em/server'
+require 'foxbat/connection'
+require 'foxbat/server'
+require 'foxbat/handler'
 
-module EventMachine
+module Foxbat
 
   def self.start_server host, port=nil, handler=nil, *args, &block
     s = Server.new(host, port, handler, block)
@@ -27,5 +28,6 @@ module EventMachine
 
 end
 
-# Alias for {EventMachine}
+EventMachine = Foxbat
 EM = EventMachine
+

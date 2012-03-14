@@ -9,25 +9,13 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.lang.Long
 
-module EventMachine
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import java.security.KeyStore
 
-  class Handler
-    include CompletionHandler
+#require File.join(File.dirname(__FILE__), 'handler.rb')
 
-    def initialize(source, &block)
-      @source = source
-      @completion = block
-    end
-
-    def completed(socket,attachment)
-      @completion.call(@source,socket)
-    end
-
-    def failed(x,y)
-      p 'failed'
-    end
-
-  end
+module Foxbat
 
   class Server
 
@@ -61,12 +49,7 @@ module EventMachine
       @service.awaitTermination(Long::MAX_VALUE, TimeUnit::SECONDS)
     end
 
-    def stop
-      shutdown
-    end
-
     def read_channel(channel, connection, buffer=nil, memo="")
-
       @block.call(connection)
 
       if buffer.nil?
@@ -77,32 +60,32 @@ module EventMachine
       end
 
       reader = Handler.new(channel) do |c,br|
+
         if br == -1
           c.close
           connection.unbind
-        end
-
-        if br == BUF_SIZE
-          buffer.flip
-          memo << btos(buffer)
-          buffer.clear
-          read_channel(c, connection, buffer, memo)
         else
           buffer.flip
-          memo << btos(buffer)
+          str = btos(buffer)
+          memo << str
           buffer.clear
 
-          p memo.getbyte(0)
+          if br == BUF_SIZE
+            buffer.rewind
+            read_channel(c, connection, buffer, memo)
+          else
+            p memo
+            connection.receive_data(memo)
+            read_channel(c, connection)
+          end
 
-          connection.receive_data(memo)
-          read_channel(c, connection, buffer)
         end
       end
 
       channel.read(buffer, nil, reader)
     end
 
-    def shutdown
+    def stop
       @server.close
       @group.awaitTermination(1, TimeUnit::SECONDS)
       @service.shutdownNow
