@@ -5,6 +5,8 @@ module EventMachine
   
   class Connection
 
+    BUF_SIZE = 512
+
     attr_accessor :channel, :ssl_engine, :block, :executor
     attr_reader :open_time, :close_time
 
@@ -29,7 +31,7 @@ module EventMachine
     end
 
     def start_tls(args={})
-      # todo
+      @ssl_session = @ssl_engine.getSession
     end
 
     def receive_data(data)
@@ -45,14 +47,8 @@ module EventMachine
       
       @block.call(self)
 
-#      @ssl_session ||= @ssl_engine.getSession
-#      @abs ||= @ssl_session.getApplicationBufferSize
-      #      @pbs ||= @ssl_session.getPacketBufferSize
-
-      @abs ||= 256
-
       if buffer.nil?
-        bb = ByteBuffer.allocate(@abs)
+        bb = ByteBuffer.allocate(BUF_SIZE)
         bb.clear
         return read_channel(bb)
       end

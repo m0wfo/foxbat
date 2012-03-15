@@ -3,7 +3,7 @@ import java.util.concurrent.Executors
 module EventMachine
 
   def self.start_server host, port=nil, handler=nil, *args, &block
-    s = Foxbat::Server.new(host, port, handler, block)
+    s = Foxbat::Server.new(host, port, handler, args.first, block)
 
     @@servers ||= []
     @@servers << s
