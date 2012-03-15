@@ -1,12 +1,10 @@
 require 'java'
 
 require 'em/connection'
-require 'em/server'
+require 'foxbat/server'
 require 'foxbat/handler'
 require 'foxbat/version'
+require File.join(File.dirname(__FILE__), 'eventmachine.rb')
 
 module EventMachine; end
-module Foxbat; end
-
 EM = EventMachine
-

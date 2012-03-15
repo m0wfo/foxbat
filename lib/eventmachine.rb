@@ -1,9 +1,7 @@
-require 'foxbat'
-
 module EventMachine
 
   def self.start_server host, port=nil, handler=nil, *args, &block
-    s = Server.new(host, port, handler, block)
+    s = Foxbat::Server.new(host, port, handler, block)
 
     @@servers ||= []
     @@servers << s
