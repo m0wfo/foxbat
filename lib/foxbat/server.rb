@@ -51,7 +51,7 @@ module Foxbat
       handler = Foxbat::Handler.new(@server) do |source,socket|
         source.accept(nil,handler)
 
-        connection = @klass.new({:debug => true})
+        connection = @klass.new({})
         connection.channel = socket
         connection.block = @block
         connection.executor = @service
@@ -62,6 +62,7 @@ module Foxbat
 
 #        connection.ssl_engine = engine
         connection.post_init
+        connection.set_time
 
         connection.read_channel
       end
@@ -73,7 +74,7 @@ module Foxbat
 
     def stop
       @server.close
-      @group.awaitTermination(1, TimeUnit::SECONDS)
+      @group.awaitTermination(0, TimeUnit::SECONDS)
     end
   end
   

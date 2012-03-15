@@ -6,6 +6,7 @@ module EventMachine
   class Connection
 
     attr_accessor :channel, :ssl_engine, :block, :executor
+    attr_reader :open_time, :close_time
 
     def peername
       @channel.getRemoteAddress
@@ -23,12 +24,21 @@ module EventMachine
 
     def unbind; end
 
+    def set_time
+      @open_time ||= Time.now.to_i
+    end
+
+    def start_tls(args={})
+      # todo
+    end
+
     def receive_data(data)
       p 'Incoming data...'
     end
 
     def close_connection(after_writing=false)
       @channel.close
+      @close_time = Time.now.to_i
     end
 
     def read_channel(buffer=nil)
@@ -39,7 +49,7 @@ module EventMachine
 #      @abs ||= @ssl_session.getApplicationBufferSize
       #      @pbs ||= @ssl_session.getPacketBufferSize
 
-      @abs = 128
+      @abs ||= 256
 
       if buffer.nil?
         bb = ByteBuffer.allocate(@abs)
