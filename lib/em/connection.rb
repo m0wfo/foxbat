@@ -1,5 +1,4 @@
 import java.nio.ByteBuffer
-import javax.net.ssl.SSLEngineResult::HandshakeStatus
 
 module EventMachine
   
@@ -7,7 +6,7 @@ module EventMachine
 
     BUF_SIZE = 512
 
-    attr_accessor :channel, :ssl_engine, :block, :executor
+    attr_accessor :channel, :block
     attr_reader :open_time, :close_time
 
     def peername
@@ -19,6 +18,7 @@ module EventMachine
       buf = ByteBuffer.allocate(arr.length)
       buf.put(arr)
       buf.flip
+
       @channel.write(buf)
     end
 
@@ -30,17 +30,24 @@ module EventMachine
       @open_time ||= Time.now.to_i
     end
 
-    def start_tls(args={})
-      @ssl_session = @ssl_engine.getSession
-    end
+    def start_tls(args={});  end
 
     def receive_data(data)
       p 'Incoming data...'
     end
 
     def close_connection(after_writing=false)
-      @channel.close
+      if after_writing == false
+        @channel.close
+      else
+        @channel.shutdownInput
+        @channel.shutdownOutput
+      end
       @close_time = Time.now.to_i
+    end
+
+    def close_connection_after_writing
+      close_connection(true)
     end
 
     def read_channel(buffer=nil)
