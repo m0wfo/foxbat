@@ -19,17 +19,23 @@ module EventMachine
       @channel.write(buf)
     end
 
+    def post_init; end
+
+    def unbind; end
+
     def close_connection(after_writing=false)
       @channel.close
     end
 
-    def read_channel(buffer=nil, memo="")
+    def read_channel(buffer=nil)
       
       @block.call(self)
 
-      @ssl_session ||= @ssl_engine.getSession
-      @abs ||= @ssl_session.getApplicationBufferSize
-      @pbs ||= @ssl_session.getPacketBufferSize
+#      @ssl_session ||= @ssl_engine.getSession
+#      @abs ||= @ssl_session.getApplicationBufferSize
+      #      @pbs ||= @ssl_session.getPacketBufferSize
+
+      @abs = 128
 
       if buffer.nil?
         bb = ByteBuffer.allocate(@abs)
@@ -38,24 +44,18 @@ module EventMachine
       end
 
       reader = Foxbat::Handler.new(@channel) do |c,br|
-
         if br == -1
           c.close
           self.unbind
         else
           buffer.flip
           str = btos(buffer)
-          memo << str
+
           buffer.clear
           buffer.rewind
 
-          if br == @abs
-            read_channel(buffer, memo)
-          else
-            self.receive_data(memo)
-            read_channel(buffer)
-          end
-
+          self.receive_data(str)
+          read_channel(buffer)
         end
       end
 
@@ -65,7 +65,7 @@ module EventMachine
     private
 
     def btos(buf)
-      return String.from_java_bytes(buf.array[buf.position..buf.limit])
+      return String.from_java_bytes(buf.array[buf.position..(buf.limit-1)])
     end
   end
 end

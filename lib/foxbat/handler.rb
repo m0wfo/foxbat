@@ -20,7 +20,7 @@ module Foxbat
     def failed(err,attachment)
       if !err.is_a?(AsynchronousCloseException)
         if @on_fail.nil?
-          p "ERR: #{x.inspect} -> #{y.inspect}"
+          p "ERR: #{err.inspect} -> #{attachment.inspect}"
         else
           @on_fail.call(err, attachment)
         end

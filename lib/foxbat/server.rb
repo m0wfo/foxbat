@@ -35,12 +35,12 @@ module Foxbat
       @ssl_context.init(@kmf.getKeyManagers, @tmf.getTrustManagers, nil)
     end
 
-    def initialize(host, port, klass, block)
+    def initialize(host, port, klass, block=nil)
       @bind_address = InetSocketAddress.new(host, port)
       @klass = klass
-      @block = block
+      @block = block || Proc.new {}
 
-      setup_ssl
+#      setup_ssl
     end
 
     def start(threadpool)
@@ -56,11 +56,11 @@ module Foxbat
         connection.block = @block
         connection.executor = @service
 
-        engine = @ssl_context.createSSLEngine
-        engine.setUseClientMode(false)
-        engine.setNeedClientAuth(false)
+#        engine = @ssl_context.createSSLEngine
+#        engine.setUseClientMode(false)
+#        engine.setNeedClientAuth(false)
 
-        connection.ssl_engine = engine
+#        connection.ssl_engine = engine
         connection.post_init
 
         connection.read_channel
