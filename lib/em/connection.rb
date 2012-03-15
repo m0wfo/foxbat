@@ -23,6 +23,10 @@ module EventMachine
 
     def unbind; end
 
+    def receive_data(data)
+      p 'Incoming data...'
+    end
+
     def close_connection(after_writing=false)
       @channel.close
     end
