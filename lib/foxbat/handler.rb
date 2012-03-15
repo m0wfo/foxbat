@@ -1,4 +1,5 @@
 import java.nio.channels.CompletionHandler
+import java.nio.channels.AsynchronousCloseException
 
 module Foxbat
 
@@ -16,11 +17,13 @@ module Foxbat
       @completion.call(@source,socket)
     end
 
-    def failed(x,y)
-      if @on_fail.nil?
-        p 'failed'
-      else
-        @on_fail.call(x,y)
+    def failed(err,attachment)
+      if !err.is_a?(AsynchronousCloseException)
+        if @on_fail.nil?
+          p "ERR: #{x.inspect} -> #{y.inspect}"
+        else
+          @on_fail.call(err, attachment)
+        end
       end
     end
 

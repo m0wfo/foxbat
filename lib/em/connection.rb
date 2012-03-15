@@ -7,6 +7,10 @@ module EventMachine
 
     attr_accessor :channel, :ssl_engine, :block, :executor
 
+    def peername
+      @channel.getRemoteAddress
+    end
+
     def send_data(data)
       arr = data.to_java_bytes
       buf = ByteBuffer.allocate(arr.length)

@@ -2,7 +2,6 @@ import java.net.InetSocketAddress
 import java.nio.channels.AsynchronousServerSocketChannel
 import java.nio.channels.AsynchronousSocketChannel
 import java.nio.channels.AsynchronousChannelGroup
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.lang.Long
 
@@ -38,16 +37,15 @@ module Foxbat
 
     def initialize(host, port, klass, block)
       @bind_address = InetSocketAddress.new(host, port)
-      @service = Executors.newCachedThreadPool(Executors.defaultThreadFactory)
-      @group = AsynchronousChannelGroup.withCachedThreadPool(@service, 1)
-      @server = AsynchronousServerSocketChannel.open(@group)
       @klass = klass
       @block = block
 
       setup_ssl
     end
 
-    def start
+    def start(threadpool)
+      @group = AsynchronousChannelGroup.withCachedThreadPool(threadpool, 1)
+      @server = AsynchronousServerSocketChannel.open(@group)
       @server.bind(@bind_address)
 
       handler = Foxbat::Handler.new(@server) do |source,socket|
@@ -70,13 +68,12 @@ module Foxbat
 
       @server.accept(nil, handler)
 
-      @service.awaitTermination(Long::MAX_VALUE, TimeUnit::SECONDS)
+      
     end
 
     def stop
       @server.close
       @group.awaitTermination(1, TimeUnit::SECONDS)
-      @service.shutdownNow
     end
   end
   
