@@ -1,26 +1,33 @@
-import java.util.concurrent.Phaser
-
 module Foxbat
 
-  class Phaser
-    def onAdvance(x,y)
-      p x
+  class FBPhaser < java.util.concurrent.Phaser
+
+    attr_writer :limit, :callback
+    
+    def onAdvance(phase, parties)
+      if (phase + 1) == @limit
+        true
+      else
+        @callback.call if @callback
+        false
+      end
     end
   end
 
   class Barrier
 
-    def initialize(tasks, repeat=1)
-      @phaser = Phaser.new(1)
-      if repeat == :infinite
+    def initialize(tasks, callback=nil, repeat=1)
+      @phaser = FBPhaser.new(1)
+      if repeat == 0
         repeat = java.lang.Integer::MAX_VALUE
       end
-      @running = AtomicBoolean.new(true)
+      @phaser.limit = repeat
+      @phaser.callback = callback
 
       phased_tasks = tasks.map do |t|
         Proc.new do
           @phaser.register
-          while !@phaser.isTerminated && @phaser.getPhase <= repeat-1
+          while !@phaser.isTerminated# && @phaser.getPhase < repeat
             t.call
             @phaser.arriveAndAwaitAdvance
           end
