@@ -16,6 +16,7 @@ Java 7 is cool (really!): proper native asynchronous I/O, phasers etc. The JRuby
 
 * The EM run-loop is actually backed by a cached thread pool
 * Mutually exclusive timers / futures for fine-grained thread coordination
+* Easy to use barriers
 * Written in pure Ruby- no native code (although it *is* tied to the JVM)
 * ...watch this space
 
