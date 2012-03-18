@@ -2,6 +2,12 @@ import java.util.concurrent.Phaser
 
 module Foxbat
 
+  class Phaser
+    def onAdvance(x,y)
+      p x
+    end
+  end
+
   class Barrier
 
     def initialize(tasks, repeat=1)
