@@ -2,4 +2,4 @@
 
 A plug-compatible EventMachine replacement, built from the ground up for JRuby
 
-![Foxbat](http://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Russian_Air_Force_MiG-25.jpg/800px-Russian_Air_Force_MiG-25.jpg)
+![](http://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Russian_Air_Force_MiG-25.jpg/800px-Russian_Air_Force_MiG-25.jpg)
