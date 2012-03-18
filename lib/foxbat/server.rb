@@ -33,11 +33,11 @@ module Foxbat
       handler = Foxbat::Handler.new(@server) do |source,socket|
         source.accept(nil,handler)
 
-        connection = @klass.new({:debug => true})
+        connection = @klass.new({})
         connection.channel = socket
         connection.block = @block
+        connection.server_post_init
         connection.post_init
-        connection.set_time
 
         connection.read_channel
       end

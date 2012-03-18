@@ -1,6 +1,7 @@
 require 'java'
 
 require 'em/connection'
+require 'foxbat/barrier'
 require 'foxbat/server'
 require 'foxbat/handler'
 require 'foxbat/version'

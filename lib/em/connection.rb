@@ -4,7 +4,7 @@ module EventMachine
   
   class Connection
 
-    BUF_SIZE = 512
+    BUF_SIZE = 256
 
     attr_accessor :channel, :block
     attr_reader :open_time, :close_time
@@ -19,16 +19,16 @@ module EventMachine
       buf.put(arr)
       buf.flip
 
-      @channel.write(buf)
+      @channel.write(buf, nil, Foxbat::Handler.new(@channel) {|x,y| })
     end
 
     def post_init; end
 
-    def unbind; end
-
-    def set_time
+    def server_post_init
       @open_time ||= Time.now.to_i
     end
+
+    def unbind; end
 
     def start_tls(args={});  end
 
@@ -51,7 +51,7 @@ module EventMachine
     end
 
     def read_channel(buffer=nil)
-      
+
       @block.call(self)
 
       if buffer.nil?

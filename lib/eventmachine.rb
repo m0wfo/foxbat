@@ -15,7 +15,7 @@ module EventMachine
   def self.epoll; end
 
   def self.run(blk=nil, tail=nil, &block)
-    @@threadpool ||= Executors.newCachedThreadPool(Executors.defaultThreadFactory)
+    @@threadpool = Executors.newCachedThreadPool
 
     block.call
 
@@ -23,8 +23,15 @@ module EventMachine
   end
 
   def self.stop
-    @@servers.each { |s| s.stop }
+    @@servers.each { |s| s.stop } unless @@servers.nil?
     @@threadpool.shutdownNow
+  end
+
+  def self.defer(op = nil, callback = nil, &blk)
+  end
+
+  def self.executor
+    @@threadpool
   end
 
 end
