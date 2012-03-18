@@ -13,6 +13,7 @@ module EventMachine
 
   # We're on the JVM- this does nothing!
   def self.epoll; end
+  def self.kqueue; end
 
   def self.run(blk=nil, tail=nil, &block)
     @@threadpool = Executors.newCachedThreadPool
@@ -25,9 +26,6 @@ module EventMachine
   def self.stop
     @@servers.each { |s| s.stop } unless @@servers.nil?
     @@threadpool.shutdownNow
-  end
-
-  def self.defer(op = nil, callback = nil, &blk)
   end
 
   def self.executor

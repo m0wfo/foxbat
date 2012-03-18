@@ -19,7 +19,7 @@ module EventMachine
       buf.put(arr)
       buf.flip
 
-      @channel.write(buf, nil, Foxbat::Handler.new(@channel) {|x,y| })
+      @channel.write(buf)
     end
 
     def post_init; end

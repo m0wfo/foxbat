@@ -28,8 +28,6 @@ module Foxbat
       @server = AsynchronousServerSocketChannel.open(@group)
       @server.bind(@bind_address)
 
-      puts 'Server listening.'
-
       handler = Foxbat::Handler.new(@server) do |source,socket|
         source.accept(nil,handler)
 
