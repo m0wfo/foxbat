@@ -22,7 +22,7 @@ module Foxbat
       keystore = KeyStore.getInstance(KeyStore.getDefaultType)
       fis = FileInputStream.new(path)
       
-      p 'Enter passphrase for keystore:'
+      puts 'Enter passphrase for keystore:'
       password = java.lang.System.console.readPassword()
 
       begin
@@ -77,10 +77,10 @@ module Foxbat
 
         connection = @klass.new({})
         connection.channel = socket
+        connection.ssl_engine = create_ssl_engine if @secure
         connection.block = @block
         connection.server_post_init
         connection.post_init
-        connection.ssl_engine = create_ssl_engine if @secure
 
         connection.read_channel
       end
