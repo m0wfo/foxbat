@@ -14,12 +14,7 @@ module EventMachine
     end
 
     def send_data(data)
-      arr = data.to_java_bytes
-      buf = ByteBuffer.allocate(arr.length)
-      buf.put(arr)
-      buf.flip
-
-      @channel.write(buf)
+      @channel.write(ByteBuffer.wrap(data.to_java_bytes))
     end
 
     def post_init; end
