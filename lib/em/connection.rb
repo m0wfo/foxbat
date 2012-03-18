@@ -6,7 +6,7 @@ module EventMachine
 
     BUF_SIZE = 256
 
-    attr_accessor :channel, :block
+    attr_accessor :channel, :block, :ssl_engine
     attr_reader :open_time, :close_time
 
     def peername
@@ -30,10 +30,14 @@ module EventMachine
 
     def unbind; end
 
-    def start_tls(args={});  end
+    def start_tls(args={})
+      @ssl_session ||= @ssl_engine.getSession
+      @app_buf ||= @ssl_session.getApplicationBufferSize
+      @net_buf ||= @ssl_session.getPacketBufferSize
+    end
 
     def receive_data(data)
-      p 'Incoming data...'
+      puts 'Incoming data...'
     end
 
     def close_connection(after_writing=false)
@@ -50,14 +54,22 @@ module EventMachine
       close_connection(true)
     end
 
-    def read_channel(buffer=nil)
+    def read_channel(buffer=nil, app_bb=nil)
 
       @block.call(self)
 
       if buffer.nil?
-        bb = ByteBuffer.allocate(BUF_SIZE)
-        bb.clear
-        return read_channel(bb)
+        if @ssl_engine
+          bb = ByteBuffer.allocate(@net_buf)
+          app_bb = ByteBuffer.allocate(@app_buf)
+          bb.clear
+          app_bb.clear
+          return read_channel(bb, net_bb)
+        else
+          bb = ByteBuffer.allocate(BUF_SIZE)
+          bb.clear
+          return read_channel(bb)
+        end
       end
 
       reader = Foxbat::Handler.new(@channel) do |c,br|
@@ -65,6 +77,8 @@ module EventMachine
           c.close
           self.unbind
         else
+          p @ssl_engine.getHandshakeStatus
+          
           buffer.flip
           str = btos(buffer)
 
