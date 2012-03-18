@@ -1,3 +1,5 @@
+require 'timeout'
+
 module Foxbat
 
   class FBPhaser < java.util.concurrent.Phaser
@@ -16,7 +18,7 @@ module Foxbat
 
   class Barrier
 
-    def initialize(tasks, callback=nil, repeat=1)
+    def initialize(tasks, callback=nil, repeat=1, timeout=Long::MAX_VALUE, err=nil)
       @phaser = FBPhaser.new(1)
       if repeat == 0
         repeat = java.lang.Integer::MAX_VALUE
@@ -27,15 +29,19 @@ module Foxbat
       phased_tasks = tasks.map do |t|
         Proc.new do
           @phaser.register
-          while !@phaser.isTerminated# && @phaser.getPhase < repeat
-            t.call
+          while !@phaser.isTerminated
+            begin
+              Timeout::timeout(timeout) { t.call }
+            rescue Exception => e
+              err.call(e) if err
+              break
+            end
             @phaser.arriveAndAwaitAdvance
           end
         end
       end
 
       phased_tasks.each { |t| EM.executor.execute(t) }
-
 
       start = Proc.new do
         parties = @phaser.getRegisteredParties
