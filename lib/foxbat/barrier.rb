@@ -18,7 +18,7 @@ module Foxbat
 
   class Barrier
 
-    def initialize(tasks, callback=nil, repeat=1, timeout=Long::MAX_VALUE, err=nil)
+    def initialize(tasks, repeat=1, callback=nil, timeout=Long::MAX_VALUE, err=nil)
       @phaser = FBPhaser.new(1)
       if repeat == 0
         repeat = java.lang.Integer::MAX_VALUE
@@ -54,6 +54,10 @@ module Foxbat
       end
 
       start.call
+    end
+
+    def iterations
+      @phaser.getPhase + 1
     end
 
     def cancel

@@ -1,6 +1,8 @@
 require 'java'
 
 require 'em/connection'
+require 'em/periodic_timer'
+require 'em/timer'
 require 'foxbat/barrier'
 require 'foxbat/server'
 require 'foxbat/handler'
