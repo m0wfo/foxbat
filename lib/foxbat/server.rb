@@ -23,14 +23,14 @@ module Foxbat
       fis = FileInputStream.new(path)
       
       puts 'Enter passphrase for keystore:'
-      password = java.lang.System.console.readPassword()
+      password = java.lang.System.console.readPassword
 
       begin
         keystore.load(fis, password)
       rescue IOException
-        p 'Invalid passphrase.'
+        puts 'Invalid passphrase.'
         fis.close
-        setup_keystore(path)
+        return setup_keystore(path)
       end
       fis.close
 
@@ -41,6 +41,9 @@ module Foxbat
       tmf.init(keystore)
 
       password = nil # Paranoid, per the JavaDoc
+
+      puts 'Keystore successfully loaded.'
+      
       [kmf, tmf]
     end
 

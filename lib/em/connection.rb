@@ -16,7 +16,7 @@ module EventMachine
     end
 
     def send_data(data)
-      send_ssl_data(data) if @ssl_engine
+      return send_ssl_data(data) if @ssl_engine
       arr = data.to_java_bytes
       buf = ByteBuffer.allocate(arr.length)
       buf.put(arr)
@@ -89,10 +89,10 @@ module EventMachine
 
     private
 
-    def read_ssl_channel(buffer=nil, app_buffer=nil)
-      setup_ssl
+    def read_ssl_channel(buffer=nil, app_buffer=nil, &block)
 
       if buffer.nil?
+        setup_ssl
         bb = ByteBuffer.allocate(@net_buf)
         app_bb = ByteBuffer.allocate(@app_buf)
         bb.clear
@@ -101,13 +101,17 @@ module EventMachine
       end
 
       ssl_reader = Foxbat::Handler.new(@channel) do |c,br|
-        p br
         if br == -1
           c.close
           self.unbind
         else
           buffer.flip
-          process_ssl(@ssl_engine.getHandshakeStatus, buffer, app_buffer)
+          if block_given?
+            p 'BLOCK'
+            block.call(buffer, app_buffer)
+          else
+            process_ssl(@ssl_engine.getHandshakeStatus, buffer, app_buffer)
+          end
         end
       end
 
@@ -141,7 +145,7 @@ module EventMachine
         res = @ssl_engine.wrap(a_b, n_b)
         case res.getStatus
         when Status::OK
-          p 'ok'
+          p 'wrap ok'
           n_b.flip
           send_ssl_data(n_b)
           
@@ -154,8 +158,22 @@ module EventMachine
           p 'under'
         end
       when HandshakeStatus::NEED_UNWRAP
-        p 'unwrap'
-        read_ssl_channel
+        p 'unwrapBUM!'
+        read_ssl_channel do |net,app|
+          p 'in block'
+          res = @ssl_engine.unwrap(net, app)
+          case res.getStatus
+          when Status::OK
+            p 'ok'
+            process_ssl(res, net, app)
+          when Status::CLOSED
+            p 'closed'
+          when Status::BUFFER_OVERFLOW
+            p 'over'
+          when Status::BUFFER_UNDERFLOW
+            p 'under'
+          end
+        end
       when HandshakeStatus::NOT_HANDSHAKING
         p 'not handshaking'
         res = @ssl_engine.unwrap(n_b, a_b)
