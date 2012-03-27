@@ -11,7 +11,7 @@ module EventMachine
     begin
       s.start(@@threadpool)
     rescue NameError => e
-      puts "You can't start a server outside of the EM runloop!"
+      puts "You can't start a server outside of the EM run-loop!"
     end
   end
 

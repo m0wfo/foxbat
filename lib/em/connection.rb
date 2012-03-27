@@ -108,7 +108,7 @@ module EventMachine
         app_bb = ByteBuffer.allocate(@app_buf)
         bb.clear
         app_bb.clear
-        return read_ssl_channel(bb, app_bb)
+        return read_ssl_channel(bb, app_bb, &block)
       end
 
       ssl_reader = Foxbat::Handler.new(@channel) do |c,br|
@@ -118,7 +118,6 @@ module EventMachine
         else
           buffer.flip
           if block_given?
-            p 'BLOCK'
             block.call(buffer, app_buffer)
           else
             process_ssl(@ssl_engine.getHandshakeStatus, buffer, app_buffer)
@@ -169,9 +168,8 @@ module EventMachine
           p 'under'
         end
       when HandshakeStatus::NEED_UNWRAP
-        p 'unwrapBUM!'
+        p 'unwrap'
         read_ssl_channel do |net,app|
-          p 'in block'
           res = @ssl_engine.unwrap(net, app)
           case res.getStatus
           when Status::OK
