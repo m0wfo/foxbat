@@ -1,4 +1,7 @@
 import java.nio.ByteBuffer
+import java.nio.channels.AsynchronousFileChannel
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import javax.net.ssl.SSLEngineResult::Status
 import javax.net.ssl.SSLEngineResult::HandshakeStatus
 
@@ -15,8 +18,22 @@ module EventMachine
       @channel.getRemoteAddress
     end
 
-    def send_data(data)
-      @channel.write(ByteBuffer.wrap(data.to_java_bytes))
+    def send_data(data, &block)
+      bb = ByteBuffer.wrap(data.to_java_bytes)
+      @channel.write(bb, nil, Foxbat::Handler.new(@channel) { block.call if block_given? })
+    end
+
+    def send_file_data(path, &block)
+      file = Paths.get(path)
+      options = java.util.HashSet.new
+      options.add(StandardOpenOption::READ)
+      file_channel = AsynchronousFileChannel.open(file, options, EM.executor)
+      bb = ByteBuffer.allocate(file_channel.size)
+      file_channel.read(bb, 0, nil, Foxbat::Handler.new(bb) { |buf, br|
+                          buf.rewind
+                          @channel.write(buf, nil, Foxbat::Handler.new(@channel) {
+                                           block.call if block_given?
+                                         }) })
     end
 
     def post_init; end
