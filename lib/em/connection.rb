@@ -123,10 +123,14 @@ module EventMachine
           self.unbind
         else
           n_b.flip
-          if block_given?
-            block.call(n_b, a_b)
+          if @active
+            p 'active'
           else
-            handshake(n_b, a_b)
+            if block_given?
+              block.call(n_b, a_b)
+            else
+              handshake(n_b, a_b)
+            end
           end
         end
       end
@@ -187,17 +191,19 @@ module EventMachine
     def handle_result(result, options={})
       if result.getHandshakeStatus == HandshakeStatus::FINISHED
         p "handshake finished."
-      end
-
-      case result.getStatus # SSLEngineResult
-      when Status::OK
-        (options[:ok] || lambda { p 'ok' }).call
-      when Status::BUFFER_OVERFLOW
-        (options[:overflow] || lambda { p 'overflow' }).call
-      when Status::BUFFER_UNDERFLOW
-        (options[:underflow] || lambda { p 'underflow' }).call
-      when Status::CLOSED
-        (options[:closed] || lambda { p 'closed' }).call
+        @active = true
+        read_ssl_channel
+      else
+        case result.getStatus # SSLEngineResult
+        when Status::OK
+          (options[:ok] || lambda { p 'ok' }).call
+        when Status::BUFFER_OVERFLOW
+          (options[:overflow] || lambda { p 'overflow' }).call
+        when Status::BUFFER_UNDERFLOW
+          (options[:underflow] || lambda { p 'underflow' }).call
+        when Status::CLOSED
+          (options[:closed] || lambda { p 'closed' }).call
+        end
       end
     end
 
