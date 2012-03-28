@@ -100,95 +100,104 @@ module EventMachine
 
     private
 
-    def read_ssl_channel(buffer=nil, app_buffer=nil, &block)
+    def app_buffer
+      buf = ByteBuffer.allocate(@app_buf)
+      buf.clear
+      buf
+    end
 
-      if buffer.nil?
-        setup_ssl
-        bb = ByteBuffer.allocate(@net_buf)
-        app_bb = ByteBuffer.allocate(@app_buf)
-        bb.clear
-        app_bb.clear
-        return read_ssl_channel(bb, app_bb, &block)
-      end
-
+    def net_buffer
+      buf = ByteBuffer.allocate(@net_buf)
+      buf.clear
+      buf
+    end
+        
+    def read_ssl_channel(n_b=nil, a_b=nil, &block)
+      setup_ssl
+      n_b ||= net_buffer()
+      a_b ||= app_buffer()
+      
       ssl_reader = Foxbat::Handler.new(@channel) do |c,br|
         if br == -1
           c.close
           self.unbind
         else
-          buffer.flip
+          n_b.flip
           if block_given?
-            block.call(buffer, app_buffer)
+            block.call(n_b, a_b)
           else
-            process_ssl(@ssl_engine.getHandshakeStatus, buffer, app_buffer)
+            handshake(n_b, a_b)
           end
         end
       end
 
-      @channel.read(buffer, nil, ssl_reader)
+      @channel.read(n_b, nil, ssl_reader)
     end
 
     def btos(buf)
       return String.from_java_bytes(buf.array[buf.position..(buf.limit-1)])
     end
 
-    def process_ssl(result, n_b=nil, a_b=nil)
-      if result.is_a?(SSLEngineResult)
-        result = result.getHandshakeStatus
-      end
+    def handshake(n_b=nil, a_b=nil)
+      n_b ||= net_buffer
+      a_b ||= app_buffer
       
-      case result
+      case @ssl_engine.getHandshakeStatus
       when HandshakeStatus::NEED_TASK
         p 'handshake tasks remaining'
         task = @ssl_engine.getDelegatedTask
-        if !task.nil?
-          work = Proc.new do
-            task.run
-            process_ssl(@ssl_engine.getHandshakeStatus, n_b, a_b)
-          end
-
-          EM.executor.execute(work)
+        while !task.nil?
+          task.run
+          task = @ssl_engine.getDelegatedTask
         end
+        handshake(n_b, a_b)
       when HandshakeStatus::NEED_WRAP
         p 'wrap'
-        n_b.compact
         res = @ssl_engine.wrap(a_b, n_b)
-        case res.getStatus
-        when Status::OK
-          p 'wrap ok'
-          n_b.flip
-          send_ssl_data(n_b)
-          
-          process_ssl(@ssl_engine.getHandshakeStatus, n_b, a_b)
-        when Status::CLOSED
-          p 'closed'
-        when Status::BUFFER_OVERFLOW
-          p 'over'
-        when STATUS::BUFFER_UNDERFLOW
-          p 'under'
-        end
+        handle_result(res,
+                      :ok => lambda {
+                        p 'ok'
+                        n_b.flip
+                        send_ssl_data(n_b)
+                        handshake(n_b)
+                      },
+                      :overflow => lambda { p 'ovf'; n_b.compact; handshake(n_b) },
+                      :finished => lambda { p ':-)' })
+
       when HandshakeStatus::NEED_UNWRAP
-        p 'unwrap'
-        read_ssl_channel do |net,app|
-          res = @ssl_engine.unwrap(net, app)
-          case res.getStatus
-          when Status::OK
-            p 'ok'
-            process_ssl(res, net, app)
-          when Status::CLOSED
-            p 'closed'
-          when Status::BUFFER_OVERFLOW
-            p 'over'
-          when Status::BUFFER_UNDERFLOW
-            p 'under'
-          end
-        end
+        res = @ssl_engine.unwrap(n_b, a_b)
+        handle_result(res,
+                      :ok => lambda { handshake(n_b, a_b) },
+                      :underflow => lambda {
+                        read_ssl_channel do |net, app|
+                          res = @ssl_engine.unwrap(net,app)
+                          handle_result(res, :ok => lambda { handshake(net, app) })
+                        end
+                        })
+
       when HandshakeStatus::NOT_HANDSHAKING
         p 'not handshaking'
         res = @ssl_engine.unwrap(n_b, a_b)
-        process_ssl(res, n_b, a_b)
-      when HandshakeStatus::FINISHED
-        p 'done'
+        handle_result(res,
+                      :ok => lambda { handshake(n_b, a_b) })
+      end
+    end
+
+    # Handler for SSLEngine results
+    def handle_result(result, options={})
+      if result.getHandshakeStatus == HandshakeStatus::FINISHED
+        p "handshake finished."
+      end
+
+      case result.getStatus # SSLEngineResult
+      when Status::OK
+        (options[:ok] || lambda { p 'ok' }).call
+      when Status::BUFFER_OVERFLOW
+        (options[:overflow] || lambda { p 'overflow' }).call
+      when Status::BUFFER_UNDERFLOW
+        (options[:underflow] || lambda { p 'underflow' }).call
+      when Status::CLOSED
+        (options[:closed] || lambda { p 'closed' }).call
       end
     end
 
