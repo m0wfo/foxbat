@@ -1,13 +1,12 @@
-import javax.net.ssl.SSLContext
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.SSLEngineResult
-import java.security.KeyStore
-import java.io.FileInputStream
-
 module Foxbat
 
-  class SecureServer < Server
+  module SecureServer
+    import javax.net.ssl.SSLContext
+    import javax.net.ssl.KeyManagerFactory
+    import javax.net.ssl.TrustManagerFactory
+    import javax.net.ssl.SSLEngineResult
+    import java.security.KeyStore
+    import java.io.FileInputStream
 
     def setup_keystore(path)
       keystore = KeyStore.getInstance(KeyStore.getDefaultType)
@@ -38,7 +37,7 @@ module Foxbat
       [kmf, tmf]
     end
 
-    def setup_ssl(keystore_path)
+    def setup_ssl_context(keystore_path)
       @secure = true
       @ssl_context = SSLContext.getInstance('TLSv1')
       kmf, tmf = setup_keystore(keystore_path)
@@ -50,11 +49,6 @@ module Foxbat
       engine.setUseClientMode(false)
       engine.setNeedClientAuth(false)
       engine
-    end
-
-    def initialize(*args)
-      setup_ssl(options[:keystore])
-      super(args)
     end
     
   end

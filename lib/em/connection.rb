@@ -39,7 +39,9 @@ module EventMachine
     def post_init; end
 
     def server_post_init
-      @open_time ||= Time.now.to_i
+      @open_time = Time.now.to_i
+      @secure = (@ssl_engine.nil? ? false : true)
+      setup_ssl if @secure
     end
 
     def unbind; end

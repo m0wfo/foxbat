@@ -9,14 +9,23 @@ import java.io.IOException
 module Foxbat
 
   class Server
+    include SecureServer
 
     def initialize(host, port, klass, options, block=nil)
       @bind_address = InetSocketAddress.new(host, port)
       @klass = klass
+      
+      if options[:secure]
+        setup_ssl_context(options[:keystore])
+        @secure = true
+      else
+        @secure = false
+      end
+
       @block = block || Proc.new {}
     end
 
-    def start(threadpool, &block)
+    def start(threadpool)
       @group = AsynchronousChannelGroup.withCachedThreadPool(threadpool, 1)
       @server = AsynchronousServerSocketChannel.open(@group)
       @server.bind(@bind_address)

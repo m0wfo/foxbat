@@ -3,16 +3,12 @@ import java.util.concurrent.Executors
 module EventMachine
 
   def self.start_server host, port=nil, handler=nil, *args, &block
-    s = Foxbat::ServerFactory.create(host, port, handler, args.first || {}, block)
+    s = Foxbat::Server.new(host, port, handler, args.first || {}, block)
 
     @@servers ||= []
     @@servers << s
 
-    begin
-      s.start(@@threadpool)
-    rescue NameError => e
-      puts "You can't start a server outside of the EM run-loop!"
-    end
+    s.start(@@threadpool)
   end
 
   # We're on the JVM- this does nothing!
