@@ -102,21 +102,15 @@ module EventMachine
 
     private
 
-    def app_buffer
-      buf = ByteBuffer.allocate(@app_buf)
+    def new_buffer(size)
+      buf = ByteBuffer.allocate(size)
       buf.clear
       buf
     end
 
-    def net_buffer
-      buf = ByteBuffer.allocate(@net_buf)
-      buf.clear
-      buf
-    end
-        
     def read_ssl_channel(n_b=nil, a_b=nil, &block)
-      n_b ||= net_buffer()
-      a_b ||= app_buffer()
+      n_b ||= new_buffer(@net_buf)
+      a_b ||= new_buffer(@app_buf)
       
       ssl_reader = Foxbat::Handler.new(@channel) do |c,br|
         if br == -1
@@ -124,14 +118,10 @@ module EventMachine
           self.unbind
         else
           n_b.flip
-          if @active
-            p 'active'
+          if block_given?
+            block.call(n_b, a_b)
           else
-            if block_given?
-              block.call(n_b, a_b)
-            else
-              handshake(n_b, a_b)
-            end
+            handshake(n_b, a_b)
           end
         end
       end
@@ -142,6 +132,22 @@ module EventMachine
     # ByteBuffer -> String
     def btos(buf)
       return String.from_java_bytes(buf.array[buf.position..(buf.limit-1)])
+    end
+
+    def transfer_data
+      p 'done!'
+      read_ssl_channel do |net,app|
+        if @ssl_engine.getHandshakeStatus == HandshakeStatus::NOT_HANDSHAKING
+          res = @ssl_engine.unwrap(net, app)
+          handle_result(res, :ok => lambda {
+                          app.compact
+                          p res.to_s
+                          p btos(app)
+                        })
+        else
+          handshake(net, app)
+        end
+      end
     end
 
     def handshake(n_b=nil, a_b=nil, done=false)
@@ -157,11 +163,11 @@ module EventMachine
         res = @ssl_engine.wrap(a_b, n_b)
         handle_result(res,
                       :ok => lambda {
-                        p 'ok'
+                        p 'wrap ok'
                         n_b.flip
                         send_ssl_data(n_b)
-                        
-                        handshake(n_b, a_b)
+                        finished = (res.getHandshakeStatus == HandshakeStatus::FINISHED)
+                        handshake(n_b, a_b, finished)
                       })
 
       when HandshakeStatus::NEED_UNWRAP
@@ -177,29 +183,27 @@ module EventMachine
 
       when HandshakeStatus::NOT_HANDSHAKING
         p 'not handshaking'
+        if done == true
+          transfer_data
+        else
           res = @ssl_engine.unwrap(n_b, a_b)
           handle_result(res,
                         :ok => lambda { handshake(n_b, a_b) })
+        end
       end
     end
 
     # Handler for SSLEngine results
     def handle_result(result, options={})
-      if result.getHandshakeStatus == HandshakeStatus::FINISHED
-        p "handshake finished."
-        p 'stat is: ' + result.getStatus.to_s
-        handshake
-      else
-        case result.getStatus # SSLEngineResult
-        when Status::OK
-          (options[:ok] || lambda { p 'ok' }).call
-        when Status::BUFFER_OVERFLOW
-          (options[:overflow] || lambda { p 'overflow' }).call
-        when Status::BUFFER_UNDERFLOW
-          (options[:underflow] || lambda { p 'underflow' }).call
-        when Status::CLOSED
-          (options[:closed] || lambda { p 'closed' }).call
-        end
+      case result.getStatus # SSLEngineResult
+      when Status::OK
+        (options[:ok] || lambda { p 'ok' }).call
+      when Status::BUFFER_OVERFLOW
+        (options[:overflow] || lambda { p 'overflow' }).call
+      when Status::BUFFER_UNDERFLOW
+        (options[:underflow] || lambda { p 'underflow' }).call
+      when Status::CLOSED
+        (options[:closed] || lambda { p 'closed' }).call
       end
     end
 
