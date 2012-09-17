@@ -1,55 +1,25 @@
 import java.net.InetSocketAddress
-import java.nio.channels.AsynchronousServerSocketChannel
-import java.nio.channels.AsynchronousSocketChannel
-import java.nio.channels.AsynchronousChannelGroup
-import java.util.concurrent.TimeUnit
-import java.lang.Long
-import java.io.IOException
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.jboss.netty.bootstrap.ServerBootstrap
+require_relative 'pipeline'
 
 module Foxbat
 
   class Server
-    include SecureServer
 
     def initialize(host, port, klass, options, block=nil)
-      @bind_address = InetSocketAddress.new(host, port)
-      @klass = klass
-      
-      if options[:secure]
-        setup_ssl_context(options[:keystore])
-        @secure = true
-      else
-        @secure = false
-      end
-
-      @block = block || Proc.new {}
+      @address = InetSocketAddress.new(host, port)
+      @pipeline = Pipeline.new(klass)
     end
 
     def start(threadpool)
-      @group = AsynchronousChannelGroup.withCachedThreadPool(threadpool, 1)
-      @server = AsynchronousServerSocketChannel.open(@group)
-      @server.bind(@bind_address)
-
-      handler = Foxbat::Handler.new(@server) do |source,socket|
-        source.accept(nil,handler)
-
-        connection = @klass.new({})
-        connection.channel = socket
-        
-        connection.ssl_engine = create_ssl_engine if @secure
-        connection.block = @block
-        connection.server_post_init
-        connection.post_init
-
-        connection.read_channel
-      end
-
-      @server.accept(nil, handler)      
+      @factory = NioServerSocketChannelFactory.new(threadpool, threadpool)
+      @bootstrap = ServerBootstrap.new(@factory)
+      @bootstrap.setPipelineFactory(@pipeline)
+      @bootstrap.bind(@address)
     end
 
     def stop
-      @server.close
-      @group.awaitTermination(0, TimeUnit::SECONDS)
     end
   end
   

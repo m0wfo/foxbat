@@ -1,14 +1,12 @@
 require 'java'
+require 'netty-3.5.0.Final.jar'
 
 require 'em/connection'
 require 'em/periodic_timer'
 require 'em/timer'
-require 'foxbat/barrier'
-require 'foxbat/secure_server'
 require 'foxbat/server'
-require 'foxbat/handler'
 require 'foxbat/version'
-require File.join(File.dirname(__FILE__), 'eventmachine.rb')
+require_relative 'eventmachine'
 
 module EventMachine; end
 EM = EventMachine
