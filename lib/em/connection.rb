@@ -6,10 +6,9 @@ module EventMachine
   
   class Connection < SimpleChannelUpstreamHandler
 
-    def send_data(data, &block)
+    def send_data(data)
       buf = ChannelBuffers.copiedBuffer(data, "UTF-8")
-      future = @channel.write(buf)
-      return if block_given?
+      @channel.write(buf)
     end
 
     def post_init; end
