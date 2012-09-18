@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = "foxbat"
-  s.version = "0.0.2"
+  s.version = "0.2.0"
   s.authors = ["Chris Mowforth"]
   s.email = ["chris@mowforth.com"]
   s.summary = "EventMachine replacement for JRuby."
-  s.description = "A drop-in replacement for EventMachine, designed & built from the ground-up around Java 7 A/IO."
+  s.description = "A drop-in replacement for EM, providing functionality missing from the Java port."
   s.files = Dir.glob("{lib}/**/*")
   s.homepage = "http://github.com/cmowforth/foxbat"
   s.has_rdoc = false

@@ -44,6 +44,10 @@ module EventMachine
       post_init
     end
 
+    def channelClosed(ctx, e)
+      unbind
+    end
+
     def messageReceived(ctx, e)
       data = e.getMessage.toString('UTF-8')
       receive_data(data)
