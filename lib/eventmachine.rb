@@ -17,7 +17,7 @@ module EventMachine
   def self.epoll; end
   def self.kqueue; end
 
-  def self.run(blk=nil, tail=nil, &block)    
+  def self.run(blk=nil, tail=nil, &block)
     @@threadpool = Executors.newCachedThreadPool
 
     block.call
