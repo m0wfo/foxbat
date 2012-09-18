@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "foxbat"
-  s.version = "0.2.3"
+  s.version = "0.2.4"
   s.authors = ["Chris Mowforth"]
   s.email = ["chris@mowforth.com"]
   s.summary = "EventMachine replacement for JRuby."
