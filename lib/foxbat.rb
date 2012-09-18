@@ -31,8 +31,10 @@ if !File.exist?(netty_jar)
 end
 
 require 'netty-3.5.0.Final.jar'
+require 'guava-13.0.1.jar'
 
 require 'em/connection'
+require 'em/deferrable'
 require 'em/periodic_timer'
 require 'em/timer'
 require 'foxbat/server'

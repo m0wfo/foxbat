@@ -32,11 +32,7 @@ module EventMachine
     end
 
     def close_connection(after_writing=false)
-      if after_writing
-        @close_scheduled = true
-      else
-        @netty_handler.close
-      end
+      @netty_handler.close
     end
 
     def close_connection_after_writing

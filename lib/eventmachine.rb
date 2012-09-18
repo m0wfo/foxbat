@@ -2,6 +2,8 @@ import java.lang.Long
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+require 'foxbat/future'
+
 module EventMachine
 
   def self.start_server host, port=nil, handler=nil, *args, &block
@@ -31,8 +33,8 @@ module EventMachine
     @@threadpool.shutdown
   end
 
-  def self.executor
-    @@threadpool
+  def self.defer(op, callback)
+    Foxbat::Future.schedule(op, callback, @@threadpool)
   end
 
   def self.reactor_running?
