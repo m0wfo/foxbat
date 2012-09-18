@@ -13,6 +13,12 @@ module Foxbat
     def initialize(handler, group, options={}, ssl_context=nil, &block)
       @options = options
       @handler = handler
+
+      if handler.class == Module
+        @handler = Class.new(EM::Connection)
+        @handler.send(:include, handler)
+      end
+      
       @group = group
       @block = block
       @context = ssl_context
