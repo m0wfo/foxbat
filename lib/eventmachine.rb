@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 module EventMachine
 
   def self.start_server host, port=nil, handler=nil, *args, &block
-    s = Foxbat::Server.new(host, port, handler, args.first || {}, block)
+    s = Foxbat::Server.new(host, port, handler, args.first || {}, &block)
 
     @@servers ||= []
     @@servers << s
@@ -26,7 +26,7 @@ module EventMachine
   end
 
   def self.stop
-    @@servers.each { |s| s.stop } unless @@servers.nil?
+    @@servers.each { |s| s.stop }
     @@threadpool.shutdownNow
   end
 

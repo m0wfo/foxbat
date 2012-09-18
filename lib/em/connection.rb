@@ -1,14 +1,20 @@
-import java.nio.ByteBuffer
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-
 module EventMachine
   
-  class Connection < SimpleChannelUpstreamHandler
+  class Connection
+
+    attr_writer :netty_handler
+
+    def self.new(*args)
+      allocate.instance_eval do
+        initialize(*args)
+        self
+      end
+    end
+
+    def initialize(*args); end
 
     def send_data(data)
-      buf = ChannelBuffers.copiedBuffer(data, "UTF-8")
-      @channel.write(buf)
+      @netty_handler.write(data)
     end
 
     def post_init; end
@@ -22,7 +28,7 @@ module EventMachine
     end
 
     def close_connection(after_writing=false)
-      @channel.close
+      @netty_handler.close
     end
 
     def close_connection_after_writing
@@ -30,31 +36,7 @@ module EventMachine
     end
 
     def get_peername
-      addr = @channel.getRemoteAddress
-      [addr.getPort, addr.getHostString]
-    end
-
-    private
-
-    # The netty channel callbacks
-
-    def channelConnected(ctx, e)
-      @pipeline = ctx.getPipeline
-      @channel = e.getChannel
-      post_init
-    end
-
-    def channelClosed(ctx, e)
-      unbind
-    end
-
-    def messageReceived(ctx, e)
-      data = e.getMessage.toString('UTF-8')
-      receive_data(data)
-    end
-
-    def exceptionCaught(ctx, e)
-      p e.toString
+      @netty_handler.peername
     end
 
   end

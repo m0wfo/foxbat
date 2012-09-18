@@ -8,12 +8,13 @@ module Foxbat
 
   class Server
 
-    def initialize(host, port, klass, options, block=nil)
+    def initialize(host, port, klass, options, &block)
       if options[:secure]
         @context = Security.setup_ssl_context(options[:keystore])
       end
+      
       @address = InetSocketAddress.new(host, port)
-      @pipeline = Pipeline.new(klass || block, @context)
+      @pipeline = Pipeline.new(klass, options, @context, &block)
     end
 
     def start(threadpool)
@@ -24,6 +25,7 @@ module Foxbat
     end
 
     def stop
+      @bootstrap.releaseExternalResources
     end
   end
   
