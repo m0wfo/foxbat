@@ -17,6 +17,10 @@ module EventMachine
       @netty_handler.write(data)
     end
 
+    def broadcast(data)
+      @netty_handler.write(data, true)
+    end
+
     def post_init; end
 
     def unbind; end

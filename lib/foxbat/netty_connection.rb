@@ -13,10 +13,12 @@ module Foxbat
       super()
     end
 
-    def write(data)
+    def write(data, broadcast=false)
       data =  data.to_java_bytes if data.is_a?(String)
       buf = ChannelBuffers.copiedBuffer(data)
-      @channel.write(buf)
+
+      recipient = broadcast ? @group : @channel
+      recipient.write(buf)
     end
 
     def close
