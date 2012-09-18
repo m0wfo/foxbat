@@ -10,7 +10,6 @@ module EventMachine
       buf = ChannelBuffers.copiedBuffer(data, "UTF-8")
       future = @channel.write(buf)
       return if block_given?
-      # todo- add future callback
     end
 
     def post_init; end
@@ -40,6 +39,7 @@ module EventMachine
     # The netty channel callbacks
 
     def channelConnected(ctx, e)
+      @pipeline = ctx.getPipeline
       @channel = e.getChannel
       post_init
     end

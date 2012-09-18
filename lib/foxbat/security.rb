@@ -1,6 +1,6 @@
 module Foxbat
 
-  module SecureServer
+  class Security
     import javax.net.ssl.SSLContext
     import javax.net.ssl.KeyManagerFactory
     import javax.net.ssl.TrustManagerFactory
@@ -8,7 +8,7 @@ module Foxbat
     import java.security.KeyStore
     import java.io.FileInputStream
 
-    def setup_keystore(path)
+    def self.setup_keystore(path)
       keystore = KeyStore.getInstance(KeyStore.getDefaultType)
       fis = FileInputStream.new(path)
       
@@ -37,15 +37,15 @@ module Foxbat
       [kmf, tmf]
     end
 
-    def setup_ssl_context(keystore_path)
-      @secure = true
-      @ssl_context = SSLContext.getInstance('TLSv1')
+    def self.setup_ssl_context(keystore_path)
+      context = SSLContext.getInstance('TLSv1')
       kmf, tmf = setup_keystore(keystore_path)
-      @ssl_context.init(kmf.getKeyManagers, tmf.getTrustManagers, nil)
+      context.init(kmf.getKeyManagers, tmf.getTrustManagers, nil)
+      context
     end
     
-    def create_ssl_engine
-      engine = @ssl_context.createSSLEngine
+    def self.create_ssl_engine(context)
+      engine = context.createSSLEngine
       engine.setUseClientMode(false)
       engine.setNeedClientAuth(false)
       engine
