@@ -1,5 +1,7 @@
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel.DefaultFileRegion
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 
 module Foxbat
@@ -19,6 +21,12 @@ module Foxbat
 
       recipient = broadcast ? @group : @channel
       recipient.write(buf)
+    end
+
+    def send_file(path)
+      file_channel = RandomAccessFile.new(path, 'r').getChannel
+      region = DefaultFileRegion.new(file_channel, 0, file_channel.size, true)
+      @channel.write(region)
     end
 
     def close

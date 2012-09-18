@@ -21,6 +21,10 @@ module EventMachine
       @netty_handler.write(data, true)
     end
 
+    def send_file_data(path)
+      @netty_handler.send_file(path)
+    end
+
     def post_init; end
 
     def unbind; end
