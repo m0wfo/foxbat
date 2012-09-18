@@ -42,4 +42,10 @@ require_relative 'eventmachine'
 
 
 module EventMachine; end
-EM = EventMachine
+
+begin
+  Kernel.const_get(:EM)
+rescue
+  EM = EventMachine
+end
+
