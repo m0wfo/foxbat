@@ -23,6 +23,7 @@ module EventMachine
     end
 
     def close_connection(after_writing=false)
+      @channel.close
     end
 
     def close_connection_after_writing
