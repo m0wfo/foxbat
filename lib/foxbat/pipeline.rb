@@ -10,9 +10,10 @@ module Foxbat
   class Pipeline
     include ChannelPipelineFactory
 
-    def initialize(handler, options={}, ssl_context=nil, &block)
+    def initialize(handler, group, options={}, ssl_context=nil, &block)
       @options = options
       @handler = handler
+      @group = group
       @block = block
       @context = ssl_context
     end
@@ -25,11 +26,14 @@ module Foxbat
       end
       h = @handler.new(@options)
       @block.call(h) if @block
-      connection = NettyConnection.new(h)
+      connection = NettyConnection.new(h, @group)
       pipeline.addLast("handler", connection)
       pipeline
     end
-    
+
+    def releaseExternalResources
+      p 'cleaning up factory...'
+    end
   end
 
 end

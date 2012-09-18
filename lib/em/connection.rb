@@ -43,5 +43,9 @@ module EventMachine
       @netty_handler.peername
     end
 
+    def comm_inactivity_timeout=(seconds)
+      # todo
+    end
+
   end
 end

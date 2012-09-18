@@ -18,6 +18,7 @@ module EventMachine
   def self.kqueue; end
 
   def self.run(blk=nil, tail=nil, &block)
+    @alive = true
     @@threadpool = Executors.newCachedThreadPool
 
     block.call
@@ -27,11 +28,15 @@ module EventMachine
 
   def self.stop
     @@servers.each { |s| s.stop }
-    @@threadpool.shutdownNow
+    @@threadpool.shutdown
   end
 
   def self.executor
     @@threadpool
+  end
+
+  def self.reactor_running?
+    @alive
   end
 
 end

@@ -1,4 +1,5 @@
 import java.net.InetSocketAddress
+import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.bootstrap.ServerBootstrap
 require_relative 'pipeline'
@@ -12,20 +13,22 @@ module Foxbat
       if options[:secure]
         @context = Security.setup_ssl_context(options[:keystore])
       end
-      
+
+      @group = DefaultChannelGroup.new
       @address = InetSocketAddress.new(host, port)
-      @pipeline = Pipeline.new(klass, options, @context, &block)
+      @pipeline = Pipeline.new(klass, @group, options, @context, &block)
     end
 
     def start(threadpool)
       @factory = NioServerSocketChannelFactory.new(threadpool, threadpool)
       @bootstrap = ServerBootstrap.new(@factory)
       @bootstrap.setPipelineFactory(@pipeline)
-      @bootstrap.bind(@address)
+      @server_channel = @bootstrap.bind(@address)
+      @group.add(@server_channel)
     end
 
     def stop
-      @bootstrap.releaseExternalResources
+      @group.close.awaitUninterruptibly
     end
   end
   

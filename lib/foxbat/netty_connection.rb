@@ -6,8 +6,9 @@ module Foxbat
 
   class NettyConnection < SimpleChannelUpstreamHandler
 
-    def initialize(connection)
+    def initialize(connection, group)
       @connection = connection
+      @group = group
       connection.netty_handler = self
       super()
     end
@@ -23,6 +24,10 @@ module Foxbat
     end
 
     private
+
+    def channelOpen(ctx, e)
+      @group.add(e.getChannel)
+    end
     
     def channelConnected(ctx, e)
       @pipeline = ctx.getPipeline
