@@ -13,12 +13,13 @@ module Foxbat
     end
 
     def write(data)
-      buf = ChannelBuffers.copiedBuffer(data, "UTF-8")
+      data =  data.to_java_bytes if data.is_a?(String)
+      buf = ChannelBuffers.copiedBuffer(data)
       @channel.write(buf)
     end
 
     def close
-      
+      @channel.close
     end
 
     private
@@ -34,7 +35,7 @@ module Foxbat
     end
 
     def messageReceived(ctx, e)
-      data = e.getMessage.toString('UTF-8')
+      data = String.from_java_bytes(e.getMessage.array)
       @connection.receive_data(data)
     end
 
