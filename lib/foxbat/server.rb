@@ -23,6 +23,8 @@ module Foxbat
       @factory = NioServerSocketChannelFactory.new(threadpool, threadpool)
       @bootstrap = ServerBootstrap.new(@factory)
       @bootstrap.setPipelineFactory(@pipeline)
+      @bootstrap.setOption("child.tcpNoDelay", true)
+      @bootstrap.setOption("child.keepAlive", true)
       @server_channel = @bootstrap.bind(@address)
       @group.add(@server_channel)
     end
