@@ -35,11 +35,11 @@ require 'em/connection'
 require 'em/deferrable'
 require 'em/periodic_timer'
 require 'em/timer'
+require 'foxbat/client'
 require 'foxbat/server'
 require 'foxbat/version'
+
 require_relative 'eventmachine'
-
-
 
 module EventMachine; end
 

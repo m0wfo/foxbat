@@ -7,13 +7,18 @@ require 'foxbat/future'
 
 module EventMachine
 
-  def self.start_server host, port=nil, handler=nil, *args, &block
+  def self.start_server(host, port=nil, handler=nil, *args, &block)
     s = Foxbat::Server.new(host, port, handler, args.first || {}, &block)
 
     @@servers ||= []
     @@servers << s
 
     s.start(@@threadpool)
+  end
+
+  def self.connect(host, port=nil, handler=nil, *args, &block)
+    c = Foxbat::Client.new(host, port, handler, args.first ||  {}, &block)
+    c.start(@@threadpool)
   end
 
   # We're on the JVM- this does nothing!
