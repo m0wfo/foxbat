@@ -33,10 +33,18 @@ module Foxbat
       @channel.close
     end
 
+    def set_read_timeout(seconds)
+      
+    end
+
     private
 
     def channelOpen(ctx, e)
       @group.add(e.getChannel)
+    end
+
+    def channelClosed(ctx, e)
+      @group.remove(e.getChannel)
     end
     
     def channelConnected(ctx, e)

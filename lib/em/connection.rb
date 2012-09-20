@@ -48,7 +48,7 @@ module EventMachine
     end
 
     def comm_inactivity_timeout=(seconds)
-      # todo
+      @netty_handler.set_read_timeout(seconds)
     end
 
   end

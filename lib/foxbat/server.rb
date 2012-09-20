@@ -29,6 +29,10 @@ module Foxbat
       @group.add(@server_channel)
     end
 
+    def connection_count
+      @group.size - 1 # -1 to exclude the server's channel
+    end
+
     def stop
       @group.close.awaitUninterruptibly
     end
