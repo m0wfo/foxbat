@@ -1,4 +1,4 @@
-# foxbat
+B1;3202;0c# foxbat
 
 A plug-compatible EventMachine replacement, based on [netty](http://netty.io/).
 
@@ -8,11 +8,12 @@ This project aims to be a performant and full-featured EM replacement for JRuby 
 
 ## What works
 
-* TCP Server, aka EM::start_server
+* TCP Server, aka EM.start_server
+* TCP Client, aka EM.connect
 * SSL
-* ...watch this space
+* EM.defer
+* One-shot timers
 
-## Cool stuff you don't get with plain-old eventmachine
 
 ## Getting started
 
