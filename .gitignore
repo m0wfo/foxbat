@@ -1,3 +1,5 @@
 *.gem
+doc/*
 test/*
+.yardoc/*
 *.jar
