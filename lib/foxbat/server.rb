@@ -4,7 +4,17 @@ require_relative 'generic_connection'
 
 module Foxbat
 
-  class Server < GenericConnection
+  class Server
+    def initialize(host, port, klass, options, &block)
+      if options[:secure]
+        @context = Security.setup_ssl_context(options[:keystore])
+      end
+
+      @group = DefaultChannelGroup.new
+      @address = InetSocketAddress.new(host, port)
+      @pipeline = Pipeline.new(klass, @group, false, options, @context, &block)
+    end
+        
     def start(threadpool)
       factory = NioServerSocketChannelFactory.new(threadpool, threadpool)
       @bootstrap = ServerBootstrap.new(factory)

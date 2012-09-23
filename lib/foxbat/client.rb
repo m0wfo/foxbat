@@ -4,7 +4,7 @@ require_relative 'generic_connection'
 
 module Foxbat
 
-  class Client < GenericConnection
+  class Client
 
     def initialize(host, port, klass, options, &block)
       if options[:secure]
