@@ -14,7 +14,7 @@ module Foxbat
 
       @group = DefaultChannelGroup.new
       @address = InetSocketAddress.new(host, port)
-      @pipeline = Pipeline.new(klass, @group, options, @context, &block)
+      @pipeline = Pipeline.new(klass, @group, false, options, @context, &block)
     end
 
     def start; end

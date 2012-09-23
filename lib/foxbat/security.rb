@@ -24,8 +24,9 @@ module Foxbat
       end
       fis.close
 
-      kmf = KeyManagerFactory.getInstance('SunX509')
-      tmf = TrustManagerFactory.getInstance('SunX509')
+      algorithm = KeyManagerFactory.getDefaultAlgorithm
+      kmf = KeyManagerFactory.getInstance(algorithm)
+      tmf = TrustManagerFactory.getInstance(algorithm)
 
       kmf.init(keystore, password)
       tmf.init(keystore)
@@ -43,10 +44,20 @@ module Foxbat
       context.init(kmf.getKeyManagers, tmf.getTrustManagers, nil)
       context
     end
-    
-    def self.create_ssl_engine(context)
-      engine = context.createSSLEngine
-      engine.setUseClientMode(false)
+
+    def self.setup_ssl_client_context
+#      keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+#      context = SSLContext.getInstance('TLSv1')
+#      tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+#      tmf.init(keystore)
+#      context.init(nil, nil, nil)
+      #      context
+      SSLContext.getDefault
+    end
+
+    def self.create_ssl_engine(context, client=false)
+      context.createSSLEngine
+      engine.setUseClientMode(client)
       engine.setNeedClientAuth(false)
       engine
     end
