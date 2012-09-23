@@ -31,8 +31,8 @@ module Foxbat
     def getPipeline
       pipeline = Channels.pipeline
       if @context
-#        engine = Security.create_ssl_engine(@context, @client_mode)
-#        pipeline.addLast(SSL_HANDLER, SslHandler.new(engine))
+        engine = Security.create_ssl_engine(@context, @client_mode)
+        pipeline.addLast(SSL_HANDLER, SslHandler.new(engine))
       end
       h = @handler.new(@options)
       @block.call(h) if @block
