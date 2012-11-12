@@ -1,6 +1,5 @@
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.bootstrap.ClientBootstrap
-require_relative 'generic_connection'
 
 module Foxbat
 

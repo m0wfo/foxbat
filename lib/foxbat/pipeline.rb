@@ -22,7 +22,7 @@ module Foxbat
         @handler = Class.new(EM::Connection)
         @handler.send(:include, handler)
       end
-      
+
       @group = group
       @block = block
       @context = ssl_context
@@ -34,6 +34,7 @@ module Foxbat
         engine = Security.create_ssl_engine(@context, @client_mode)
         pipeline.addLast(SSL_HANDLER, SslHandler.new(engine))
       end
+
       h = @handler.new(@options)
       @block.call(h) if @block
       connection = NettyConnection.new(h, @group)
