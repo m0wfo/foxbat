@@ -1,4 +1,4 @@
-B1;3202;0c# foxbat
+# foxbat
 
 A plug-compatible EventMachine replacement, based on [netty](http://netty.io/).
 

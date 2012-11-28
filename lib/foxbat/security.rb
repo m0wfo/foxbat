@@ -46,17 +46,11 @@ module Foxbat
     end
 
     def self.setup_ssl_client_context
-#      keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-#      context = SSLContext.getInstance('TLSv1')
-#      tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
-#      tmf.init(keystore)
-#      context.init(nil, nil, nil)
-      #      context
       SSLContext.getDefault
     end
 
     def self.create_ssl_engine(context, client=false)
-      context.createSSLEngine
+      engine = context.createSSLEngine
       engine.setUseClientMode(client)
       engine.setNeedClientAuth(false)
       engine
