@@ -10,7 +10,7 @@ This project aims to be a performant and full-featured EM replacement for JRuby 
 
 * TCP Server, aka EM.start_server
 * TCP Client, aka EM.connect
-* SSL
+* SSL (now on client + server)
 * EM.defer
 * One-shot timers
 
