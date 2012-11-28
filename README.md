@@ -13,6 +13,7 @@ This project aims to be a performant and full-featured EM replacement for JRuby 
 * SSL (now on client + server)
 * EM.defer
 * One-shot timers
+* Zero-copy file transfer
 
 
 ## Getting started
