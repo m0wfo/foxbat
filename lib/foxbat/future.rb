@@ -1,13 +1,16 @@
-import com.google.common.util.concurrent.ListenableFutureTask
+import java.util.concurrent.FutureTask
 
 module Foxbat
 
-  class Future
+  class Future < FutureTask
 
-    def self.schedule(op, cb, executor)
-      future = ListenableFutureTask.create(op)
-      future.addListener(cb, executor)
-      executor.submit(future)
+    def initialize(op, cb)
+      super(op)
+      @callback = cb
+    end
+
+    def done
+      @callback.call(self.get)
     end
     
   end

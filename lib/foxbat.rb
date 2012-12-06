@@ -37,7 +37,6 @@ def require_or_get(lib, version, ns)
 end
 
 require_or_get 'netty', '3.5.0.Final', 'io/netty'
-require_or_get 'guava', '13.0.1', 'com/google/guava'
 
 require 'em/connection'
 require 'em/deferrable'

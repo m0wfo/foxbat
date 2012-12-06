@@ -49,7 +49,8 @@ module EventMachine
   end
 
   def self.defer(op, callback)
-    Foxbat::Future.schedule(op, callback, @@threadpool)
+    task = Foxbat::Future.new(op, callback)
+    @@threadpool.submit(task)
   end
 
   def self.reactor_running?
